@@ -19,7 +19,15 @@ interface WindowContextType {
 
 const WindowContext = createContext<WindowContextType | undefined>(undefined);
 
-const DEFAULT_WINDOW_SIZE = { width: 800, height: 600 };
+const TABLET_BREAKPOINT = 1024;
+
+const getDefaultWindowSize = () => {
+  const isTablet = typeof window !== 'undefined' && window.innerWidth < TABLET_BREAKPOINT && window.innerWidth >= 768;
+  return isTablet 
+    ? { width: 500, height: 400 } 
+    : { width: 800, height: 600 };
+};
+
 const DEFAULT_POSITION_OFFSET = 30;
 
 export function WindowProvider({ children }: { children: ReactNode }) {
@@ -58,7 +66,7 @@ export function WindowProvider({ children }: { children: ReactNode }) {
         isMinimized: false,
         isMaximized: false,
         position: getNewPosition(),
-        size: DEFAULT_WINDOW_SIZE,
+        size: getDefaultWindowSize(),
         zIndex: nextZIndex,
         component: icon.component,
       };

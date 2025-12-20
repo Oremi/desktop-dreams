@@ -11,7 +11,7 @@ import { GitHubWindow } from '../windows/GitHubWindow';
 import { SkillsWindow } from '../windows/SkillsWindow';
 import { ExperienceWindow } from '../windows/ExperienceWindow';
 import { useWindowContext, WindowProvider } from '@/contexts/WindowContext';
-import { useIsMobileOS } from '@/hooks/useIsMobileOS';
+import { useDeviceType } from '@/hooks/useDeviceType';
 import { DesktopIcon as DesktopIconType } from '@/types/os';
 
 const DESKTOP_ICONS: DesktopIconType[] = [
@@ -34,7 +34,7 @@ const WINDOW_COMPONENTS: Record<string, React.ComponentType> = {
 
 function DesktopContent() {
   const { windows, openWindow } = useWindowContext();
-  const isMobile = useIsMobileOS();
+  const { isMobile, isTablet } = useDeviceType();
 
   // Open About window by default on mount
   React.useEffect(() => {
@@ -63,7 +63,7 @@ function DesktopContent() {
       />
 
       {/* Desktop Icons Grid */}
-      <div className="absolute top-4 left-4 grid grid-cols-1 gap-1">
+      <div className={`absolute top-4 left-4 grid grid-cols-1 gap-1 ${isTablet ? 'scale-90' : ''}`}>
         {DESKTOP_ICONS.map((icon) => (
           <DesktopIcon
             key={icon.id}
@@ -82,7 +82,7 @@ function DesktopContent() {
           if (!WindowComponent) return null;
 
           return (
-            <WindowFrame key={window.id} window={window}>
+            <WindowFrame key={window.id} window={window} isTablet={isTablet}>
               <WindowComponent />
             </WindowFrame>
           );
