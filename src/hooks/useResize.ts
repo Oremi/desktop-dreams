@@ -1,14 +1,10 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 
 type ResizeDirection = 
   | 'n' | 's' | 'e' | 'w' 
   | 'ne' | 'nw' | 'se' | 'sw';
 
 interface UseResizeOptions {
-  minWidth?: number;
-  minHeight?: number;
-  maxWidth?: number;
-  maxHeight?: number;
   onResizeStart?: () => void;
   onResizeEnd?: () => void;
 }
@@ -20,16 +16,15 @@ export function useResize(
   ) => void,
   options: UseResizeOptions = {}
 ) {
-  const {
-    minWidth = 400,
-    minHeight = 300,
-    maxWidth = Infinity,
-    maxHeight = Infinity,
-  } = options;
-
   const [isResizing, setIsResizing] = useState(false);
   const startPos = useRef({ x: 0, y: 0 });
   const currentDirection = useRef<ResizeDirection | null>(null);
+  
+  // Use ref to always have latest callback without stale closure
+  const onResizeRef = useRef(onResize);
+  useEffect(() => {
+    onResizeRef.current = onResize;
+  }, [onResize]);
 
   const handleResizeStart = useCallback(
     (direction: ResizeDirection) => (e: React.MouseEvent) => {
@@ -70,7 +65,7 @@ export function useResize(
           posY = deltaY;
         }
 
-        onResize(
+        onResizeRef.current(
           { width: widthDelta, height: heightDelta },
           { x: posX, y: posY }
         );
@@ -87,7 +82,7 @@ export function useResize(
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
     },
-    [onResize, options]
+    [options]
   );
 
   const resizeHandlers = {

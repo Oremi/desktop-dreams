@@ -43,27 +43,24 @@ export const WindowFrame = forwardRef<HTMLDivElement, WindowFrameProps>(
     (sizeDelta: { width: number; height: number }, posDelta: { x: number; y: number }) => {
       if (window.isMaximized) return;
       
-    const minWidth = isTablet ? 300 : 400;
+      const minWidth = isTablet ? 300 : 400;
       const maxWidth = isTablet ? 700 : 1600;
       const minHeight = isTablet ? 250 : 300;
       const maxHeight = isTablet ? 600 : 1000;
       
-      const newWidth = Math.max(minWidth, Math.min(maxWidth, window.size.width + sizeDelta.width));
-      const newHeight = Math.max(minHeight, Math.min(maxHeight, window.size.height + sizeDelta.height));
-      
-      updateWindowSize(window.id, { width: newWidth, height: newHeight });
+      updateWindowSize(window.id, (currentSize) => ({
+        width: Math.max(minWidth, Math.min(maxWidth, currentSize.width + sizeDelta.width)),
+        height: Math.max(minHeight, Math.min(maxHeight, currentSize.height + sizeDelta.height)),
+      }));
       
       if (posDelta.x !== 0 || posDelta.y !== 0) {
-        const actualWidthDelta = newWidth - window.size.width;
-        const actualHeightDelta = newHeight - window.size.height;
-        
-        updateWindowPosition(window.id, {
-          x: window.position.x + (sizeDelta.width < 0 ? -actualWidthDelta : 0) + (posDelta.x !== 0 && actualWidthDelta !== 0 ? posDelta.x : 0),
-          y: window.position.y + (sizeDelta.height < 0 ? -actualHeightDelta : 0) + (posDelta.y !== 0 && actualHeightDelta !== 0 ? posDelta.y : 0),
-        });
+        updateWindowPosition(window.id, (currentPos) => ({
+          x: currentPos.x + posDelta.x,
+          y: currentPos.y + posDelta.y,
+        }));
       }
     },
-    [window.id, window.size, window.position, window.isMaximized, updateWindowSize, updateWindowPosition]
+    [window.id, window.isMaximized, isTablet, updateWindowSize, updateWindowPosition]
   );
 
   const dragHandlers = useDrag(handleDrag);
