@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Send, Mail, Github, Linkedin, Twitter } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -25,43 +26,106 @@ export function ContactWindow() {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center gap-2">
+    <motion.div 
+      className="p-6 space-y-6 transition-all duration-200 ease-out"
+      layout
+      transition={{ duration: 0.2 }}
+    >
+      <motion.div 
+        className="flex items-center gap-2"
+        layout
+        transition={{ duration: 0.2 }}
+      >
         <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
         <span className="text-sm text-success font-medium">Online</span>
-      </div>
+      </motion.div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
+      <motion.form 
+        onSubmit={handleSubmit} 
+        className="space-y-4 transition-all duration-200"
+        layout
+        transition={{ duration: 0.2 }}
+      >
+        <motion.input
           type="text" placeholder="Your Name" required value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
-          className="w-full px-4 py-3 rounded-lg bg-muted border border-border focus:border-primary focus:outline-none"
+          className="w-full px-4 py-3 rounded-lg bg-muted border border-border focus:border-primary focus:outline-none transition-all duration-200"
+          layout
+          transition={{ duration: 0.15 }}
         />
-        <input
+        <motion.input
           type="email" placeholder="Your Email" required value={form.email}
           onChange={(e) => setForm({ ...form, email: e.target.value })}
-          className="w-full px-4 py-3 rounded-lg bg-muted border border-border focus:border-primary focus:outline-none"
+          className="w-full px-4 py-3 rounded-lg bg-muted border border-border focus:border-primary focus:outline-none transition-all duration-200"
+          layout
+          transition={{ duration: 0.15 }}
         />
-        <textarea
+        <motion.textarea
           placeholder="Your Message" required rows={4} value={form.message}
           onChange={(e) => setForm({ ...form, message: e.target.value })}
-          className="w-full px-4 py-3 rounded-lg bg-muted border border-border focus:border-primary focus:outline-none resize-none"
+          className="w-full px-4 py-3 rounded-lg bg-muted border border-border focus:border-primary focus:outline-none resize-none transition-all duration-200"
+          layout
+          transition={{ duration: 0.15 }}
         />
-        <button type="submit" disabled={loading}
-          className="flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:opacity-90 disabled:opacity-50">
+        <motion.button 
+          type="submit" 
+          disabled={loading}
+          className="flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:opacity-90 disabled:opacity-50 transition-all duration-200"
+          layout
+          transition={{ duration: 0.15 }}
+        >
           <Send className="w-4 h-4" /> {loading ? 'Sending...' : 'Send Message'}
-        </button>
-      </form>
+        </motion.button>
+      </motion.form>
 
-      <div className="pt-4 border-t border-border">
+      <motion.div 
+        className="pt-4 border-t border-border transition-all duration-200"
+        layout
+        transition={{ duration: 0.2 }}
+      >
         <p className="text-sm text-muted-foreground mb-3">Or reach out directly:</p>
-        <div className="flex items-center gap-3">
-          <a href={`mailto:${configData.user.email}`} className="p-3 rounded-lg bg-muted hover:bg-muted/80"><Mail className="w-5 h-5" /></a>
-          <a href={`https://github.com/${configData.social.github}`} target="_blank" className="p-3 rounded-lg bg-muted hover:bg-muted/80"><Github className="w-5 h-5" /></a>
-          <a href={`https://linkedin.com/${configData.social.linkedin}`} target="_blank" className="p-3 rounded-lg bg-muted hover:bg-muted/80"><Linkedin className="w-5 h-5" /></a>
-          <a href={`https://twitter.com/${configData.social.twitter}`} target="_blank" className="p-3 rounded-lg bg-muted hover:bg-muted/80"><Twitter className="w-5 h-5" /></a>
-        </div>
-      </div>
-    </div>
+        <motion.div 
+          className="flex items-center gap-3 flex-wrap"
+          layout
+          transition={{ duration: 0.2 }}
+        >
+          <motion.a 
+            href={`mailto:${configData.user.email}`} 
+            className="p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
+            layout
+            transition={{ duration: 0.15 }}
+          >
+            <Mail className="w-5 h-5" />
+          </motion.a>
+          <motion.a 
+            href={`https://github.com/${configData.social.github}`} 
+            target="_blank" 
+            className="p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
+            layout
+            transition={{ duration: 0.15 }}
+          >
+            <Github className="w-5 h-5" />
+          </motion.a>
+          <motion.a 
+            href={`https://linkedin.com/${configData.social.linkedin}`} 
+            target="_blank" 
+            className="p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
+            layout
+            transition={{ duration: 0.15 }}
+          >
+            <Linkedin className="w-5 h-5" />
+          </motion.a>
+          <motion.a 
+            href={`https://twitter.com/${configData.social.twitter}`} 
+            target="_blank" 
+            className="p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
+            layout
+            transition={{ duration: 0.15 }}
+          >
+            <Twitter className="w-5 h-5" />
+          </motion.a>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 }

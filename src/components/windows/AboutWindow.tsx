@@ -1,62 +1,93 @@
 import React from 'react';
-import { MapPin, Mail, Clock } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { MapPin, Mail } from 'lucide-react';
 import configData from '@/data/config.json';
 
 export function AboutWindow() {
   return (
-    <div className="p-6 space-y-6">
+    <motion.div 
+      className="p-6 space-y-6 transition-all duration-200 ease-out"
+      layout
+      transition={{ duration: 0.2, ease: 'easeOut' }}
+    >
       {/* Header */}
-      <div className="flex items-start gap-4">
-        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-3xl">
+      <motion.div 
+        className="flex items-start gap-4 transition-all duration-200"
+        layout
+        transition={{ duration: 0.2 }}
+      >
+        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-3xl flex-shrink-0">
           👨‍💻
         </div>
-        <div>
+        <div className="min-w-0 flex-1">
           <h1 className="text-2xl font-bold text-foreground">{configData.user.name}</h1>
           <p className="text-primary font-medium">{configData.user.title}</p>
-          <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground flex-wrap transition-all duration-200">
             <span className="flex items-center gap-1">
-              <MapPin className="w-3.5 h-3.5" />
+              <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
               {configData.user.location}
             </span>
             <span className="flex items-center gap-1">
-              <Mail className="w-3.5 h-3.5" />
+              <Mail className="w-3.5 h-3.5 flex-shrink-0" />
               {configData.user.email}
             </span>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Status */}
-      <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-success/10 border border-success/20 w-fit">
+      <motion.div 
+        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-success/10 border border-success/20 w-fit"
+        layout
+        transition={{ duration: 0.2 }}
+      >
         <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
         <span className="text-sm text-success font-medium">{configData.user.status}</span>
-      </div>
+      </motion.div>
 
       {/* Bio */}
-      <div className="space-y-3">
+      <motion.div 
+        className="space-y-3 transition-all duration-200"
+        layout
+        transition={{ duration: 0.2 }}
+      >
         {configData.user.bio.map((paragraph, index) => (
           <p key={index} className="text-muted-foreground leading-relaxed">
             {paragraph}
           </p>
         ))}
-      </div>
+      </motion.div>
 
       {/* Quick Skills */}
-      <div>
+      <motion.div layout transition={{ duration: 0.2 }}>
         <h3 className="text-sm font-semibold text-foreground mb-3">Top Skills</h3>
-        <div className="flex flex-wrap gap-2">
+        <motion.div 
+          className="flex flex-wrap gap-2 transition-all duration-200"
+          layout
+          transition={{ duration: 0.2 }}
+        >
           {configData.skills.Frontend.slice(0, 4).map((skill) => (
-            <span key={skill} className="px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
+            <motion.span 
+              key={skill} 
+              className="px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium"
+              layout
+              transition={{ duration: 0.15 }}
+            >
               {skill}
-            </span>
+            </motion.span>
           ))}
           {configData.skills.Backend.slice(0, 2).map((skill) => (
-            <span key={skill} className="px-3 py-1 rounded-full bg-accent/10 text-accent text-sm font-medium">
+            <motion.span 
+              key={skill} 
+              className="px-3 py-1 rounded-full bg-accent/10 text-accent text-sm font-medium"
+              layout
+              transition={{ duration: 0.15 }}
+            >
               {skill}
-            </span>
+            </motion.span>
           ))}
-        </div>
-      </div>
-    </div>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 }
