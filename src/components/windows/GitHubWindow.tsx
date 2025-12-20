@@ -140,8 +140,8 @@ export function GitHubWindow() {
               transition={{ duration: 0.15 }}
             >
               <BookOpen className="w-5 h-5 mx-auto mb-2 text-primary" />
-              <div className="text-2xl font-bold">{stats.publicRepos}</div>
-              <div className="text-xs text-muted-foreground">Repos</div>
+              <div className="text-window-title font-bold">{stats.publicRepos}</div>
+              <div className="text-window-small text-muted-foreground">Repos</div>
             </motion.div>
             <motion.div 
               className="p-4 rounded-lg bg-muted/50 text-center gpu-accelerate hover:bg-muted/70 transition-colors"
@@ -149,8 +149,8 @@ export function GitHubWindow() {
               transition={{ duration: 0.15 }}
             >
               <Star className="w-5 h-5 mx-auto mb-2 text-yellow-500" />
-              <div className="text-2xl font-bold">{stats.totalStars}</div>
-              <div className="text-xs text-muted-foreground">Stars</div>
+              <div className="text-window-title font-bold">{stats.totalStars}</div>
+              <div className="text-window-small text-muted-foreground">Stars</div>
             </motion.div>
             <motion.div 
               className="p-4 rounded-lg bg-muted/50 text-center gpu-accelerate hover:bg-muted/70 transition-colors"
@@ -158,8 +158,8 @@ export function GitHubWindow() {
               transition={{ duration: 0.15 }}
             >
               <Users className="w-5 h-5 mx-auto mb-2 text-accent" />
-              <div className="text-2xl font-bold">{stats.followers}</div>
-              <div className="text-xs text-muted-foreground">Followers</div>
+              <div className="text-window-title font-bold">{stats.followers}</div>
+              <div className="text-window-small text-muted-foreground">Followers</div>
             </motion.div>
             <motion.div 
               className="p-4 rounded-lg bg-muted/50 text-center gpu-accelerate hover:bg-muted/70 transition-colors"
@@ -167,8 +167,8 @@ export function GitHubWindow() {
               transition={{ duration: 0.15 }}
             >
               <GitFork className="w-5 h-5 mx-auto mb-2 text-muted-foreground" />
-              <div className="text-2xl font-bold">{stats.totalForks}</div>
-              <div className="text-xs text-muted-foreground">Forks</div>
+              <div className="text-window-title font-bold">{stats.totalForks}</div>
+              <div className="text-window-small text-muted-foreground">Forks</div>
             </motion.div>
           </motion.div>
 
@@ -179,7 +179,7 @@ export function GitHubWindow() {
               layout
               transition={{ duration: 0.2 }}
             >
-              <h3 className="text-sm font-semibold text-muted-foreground">Top Repositories</h3>
+              <h3 className="text-window-small font-semibold text-muted-foreground">Top Repositories</h3>
               <motion.div 
                 className="space-y-2"
                 layout
@@ -196,8 +196,8 @@ export function GitHubWindow() {
                     transition={{ duration: 0.15 }}
                   >
                     <div className="flex items-center justify-between flex-wrap gap-2">
-                      <span className="font-medium text-sm">{repo.name}</span>
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <span className="font-medium text-window-small">{repo.name}</span>
+                      <div className="flex items-center gap-3 text-window-small text-muted-foreground">
                         {repo.language && (
                           <span className="px-2 py-0.5 rounded bg-primary/10 text-primary">
                             {repo.language}
@@ -212,7 +212,7 @@ export function GitHubWindow() {
                       </div>
                     </div>
                     {repo.description && (
-                      <p className="text-xs text-muted-foreground mt-1 truncate">
+                      <p className="text-window-small text-muted-foreground mt-1 truncate">
                         {repo.description}
                       </p>
                     )}
@@ -229,7 +229,7 @@ export function GitHubWindow() {
               layout
               transition={{ duration: 0.2 }}
             >
-              <h3 className="text-sm font-semibold text-muted-foreground">Recent Activity</h3>
+              <h3 className="text-window-small font-semibold text-muted-foreground">Recent Activity</h3>
               <motion.div 
                 className="space-y-2"
                 layout
@@ -244,8 +244,8 @@ export function GitHubWindow() {
                   >
                     <GitCommit className="w-4 h-4 mt-0.5 text-success flex-shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm truncate">{commit.message}</p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-window-small truncate">{commit.message}</p>
+                      <p className="text-window-small text-muted-foreground">
                         {commit.repo} · {formatDate(commit.date)}
                       </p>
                     </div>

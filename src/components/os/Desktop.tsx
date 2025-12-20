@@ -10,6 +10,7 @@ import { ContactWindow } from '../windows/ContactWindow';
 import { GitHubWindow } from '../windows/GitHubWindow';
 import { SkillsWindow } from '../windows/SkillsWindow';
 import { ExperienceWindow } from '../windows/ExperienceWindow';
+import { AIAssistantWindow } from '../windows/AIAssistantWindow';
 import { useWindowContext, WindowProvider } from '@/contexts/WindowContext';
 import { useDeviceType } from '@/hooks/useDeviceType';
 import { DesktopIcon as DesktopIconType } from '@/types/os';
@@ -21,6 +22,7 @@ const DESKTOP_ICONS: DesktopIconType[] = [
   { id: 'github', title: 'GitHub', icon: '🐙', component: 'GitHubWindow' },
   { id: 'skills', title: 'Skills', icon: '🎯', component: 'SkillsWindow' },
   { id: 'experience', title: 'Experience', icon: '📅', component: 'ExperienceWindow' },
+  { id: 'ai-assistant', title: 'AI Assistant', icon: '🤖', component: 'AIAssistantWindow' },
 ];
 
 const WINDOW_COMPONENTS: Record<string, React.ComponentType> = {
@@ -30,6 +32,7 @@ const WINDOW_COMPONENTS: Record<string, React.ComponentType> = {
   GitHubWindow,
   SkillsWindow,
   ExperienceWindow,
+  AIAssistantWindow,
 };
 
 function DesktopContent() {

@@ -20,9 +20,9 @@ export function AboutWindow() {
           👨‍💻
         </div>
         <div className="min-w-0 flex-1">
-          <h1 className="text-2xl font-bold text-foreground">{configData.user.name}</h1>
-          <p className="text-primary font-medium">{configData.user.title}</p>
-          <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground flex-wrap transition-all duration-200">
+          <h1 className="text-window-title font-bold text-foreground">{configData.user.name}</h1>
+          <p className="text-window-subtitle text-primary font-medium">{configData.user.title}</p>
+          <div className="flex items-center gap-4 mt-2 text-window-small text-muted-foreground flex-wrap transition-all duration-200">
             <span className="flex items-center gap-1">
               <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
               {configData.user.location}
@@ -42,7 +42,7 @@ export function AboutWindow() {
         transition={{ duration: 0.2 }}
       >
         <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
-        <span className="text-sm text-success font-medium">{configData.user.status}</span>
+        <span className="text-window-small text-success font-medium">{configData.user.status}</span>
       </motion.div>
 
       {/* Bio */}
@@ -52,7 +52,7 @@ export function AboutWindow() {
         transition={{ duration: 0.2 }}
       >
         {configData.user.bio.map((paragraph, index) => (
-          <p key={index} className="text-muted-foreground leading-relaxed">
+          <p key={index} className="text-window-body text-muted-foreground leading-relaxed">
             {paragraph}
           </p>
         ))}
@@ -60,7 +60,7 @@ export function AboutWindow() {
 
       {/* Quick Skills */}
       <motion.div layout transition={{ duration: 0.2 }}>
-        <h3 className="text-sm font-semibold text-foreground mb-3">Top Skills</h3>
+        <h3 className="text-window-small font-semibold text-foreground mb-3">Top Skills</h3>
         <motion.div 
           className="flex flex-wrap gap-2 transition-all duration-200"
           layout
@@ -69,7 +69,7 @@ export function AboutWindow() {
           {configData.skills.Frontend.slice(0, 4).map((skill) => (
             <motion.span 
               key={skill} 
-              className="px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium"
+              className="px-3 py-1 rounded-full bg-primary/10 text-primary text-window-small font-medium"
               layout
               transition={{ duration: 0.15 }}
             >
@@ -79,7 +79,7 @@ export function AboutWindow() {
           {configData.skills.Backend.slice(0, 2).map((skill) => (
             <motion.span 
               key={skill} 
-              className="px-3 py-1 rounded-full bg-accent/10 text-accent text-sm font-medium"
+              className="px-3 py-1 rounded-full bg-accent/10 text-accent text-window-small font-medium"
               layout
               transition={{ duration: 0.15 }}
             >
