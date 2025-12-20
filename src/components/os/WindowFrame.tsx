@@ -84,8 +84,9 @@ export function WindowFrame({ window, children, className }: WindowFrameProps) {
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.15, ease: 'easeOut' }}
       className={cn(
-        'absolute flex flex-col rounded-xl overflow-hidden window-shadow',
-        'bg-window/95 backdrop-blur-xl border border-window-border',
+        'absolute flex flex-col overflow-hidden window-shadow gpu-accelerate',
+        !window.isMaximized && 'rounded-xl border border-window-border',
+        'bg-window/95 backdrop-blur-xl',
         isActive ? 'ring-1 ring-primary/20' : '',
         className
       )}
