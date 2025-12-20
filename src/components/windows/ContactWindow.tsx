@@ -3,18 +3,56 @@ import { motion } from 'framer-motion';
 import { Send, Mail, Github, Linkedin, Twitter } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { z } from 'zod';
 import configData from '@/data/config.json';
+
+// Validation schema matching database constraints
+const contactSchema = z.object({
+  name: z.string()
+    .trim()
+    .min(1, 'Name is required')
+    .max(100, 'Name must be less than 100 characters'),
+  email: z.string()
+    .trim()
+    .min(5, 'Email is required')
+    .max(255, 'Email must be less than 255 characters')
+    .email('Please enter a valid email address'),
+  message: z.string()
+    .trim()
+    .min(10, 'Message must be at least 10 characters')
+    .max(5000, 'Message must be less than 5000 characters')
+});
 
 export function ContactWindow() {
   const [form, setForm] = useState({ name: '', email: '', message: '' });
+  const [errors, setErrors] = useState<{ name?: string; email?: string; message?: string }>({});
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
+    
+    // Validate form data
+    const result = contactSchema.safeParse(form);
+    if (!result.success) {
+      const fieldErrors: typeof errors = {};
+      result.error.errors.forEach((err) => {
+        const field = err.path[0] as keyof typeof errors;
+        fieldErrors[field] = err.message;
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+
     setLoading(true);
     try {
-      const { error } = await supabase.from('contact_messages').insert([form]);
+      const validatedData = result.data;
+      const { error } = await supabase.from('contact_messages').insert([{
+        name: validatedData.name,
+        email: validatedData.email,
+        message: validatedData.message
+      }]);
       if (error) throw error;
       toast({ title: 'Message sent!', description: 'Thanks for reaching out.' });
       setForm({ name: '', email: '', message: '' });
@@ -46,27 +84,39 @@ export function ContactWindow() {
         layout
         transition={{ duration: 0.2 }}
       >
-        <motion.input
-          type="text" placeholder="Your Name" required value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-          className="w-full px-4 py-3 rounded-lg bg-muted border border-border focus:border-primary focus:outline-none transition-all duration-200"
-          layout
-          transition={{ duration: 0.15 }}
-        />
-        <motion.input
-          type="email" placeholder="Your Email" required value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-          className="w-full px-4 py-3 rounded-lg bg-muted border border-border focus:border-primary focus:outline-none transition-all duration-200"
-          layout
-          transition={{ duration: 0.15 }}
-        />
-        <motion.textarea
-          placeholder="Your Message" required rows={4} value={form.message}
-          onChange={(e) => setForm({ ...form, message: e.target.value })}
-          className="w-full px-4 py-3 rounded-lg bg-muted border border-border focus:border-primary focus:outline-none resize-none transition-all duration-200"
-          layout
-          transition={{ duration: 0.15 }}
-        />
+        <div className="space-y-1">
+          <motion.input
+            type="text" placeholder="Your Name" required value={form.name}
+            maxLength={100}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            className={`w-full px-4 py-3 rounded-lg bg-muted border ${errors.name ? 'border-destructive' : 'border-border'} focus:border-primary focus:outline-none transition-all duration-200`}
+            layout
+            transition={{ duration: 0.15 }}
+          />
+          {errors.name && <p className="text-destructive text-xs">{errors.name}</p>}
+        </div>
+        <div className="space-y-1">
+          <motion.input
+            type="email" placeholder="Your Email" required value={form.email}
+            maxLength={255}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            className={`w-full px-4 py-3 rounded-lg bg-muted border ${errors.email ? 'border-destructive' : 'border-border'} focus:border-primary focus:outline-none transition-all duration-200`}
+            layout
+            transition={{ duration: 0.15 }}
+          />
+          {errors.email && <p className="text-destructive text-xs">{errors.email}</p>}
+        </div>
+        <div className="space-y-1">
+          <motion.textarea
+            placeholder="Your Message (min 10 characters)" required rows={4} value={form.message}
+            maxLength={5000}
+            onChange={(e) => setForm({ ...form, message: e.target.value })}
+            className={`w-full px-4 py-3 rounded-lg bg-muted border ${errors.message ? 'border-destructive' : 'border-border'} focus:border-primary focus:outline-none resize-none transition-all duration-200`}
+            layout
+            transition={{ duration: 0.15 }}
+          />
+          {errors.message && <p className="text-destructive text-xs">{errors.message}</p>}
+        </div>
         <motion.button 
           type="submit" 
           disabled={loading}
