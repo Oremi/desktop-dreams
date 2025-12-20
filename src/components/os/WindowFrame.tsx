@@ -11,10 +11,11 @@ interface WindowFrameProps {
   window: WindowState;
   children: React.ReactNode;
   className?: string;
+  isTablet?: boolean;
 }
 
 export const WindowFrame = forwardRef<HTMLDivElement, WindowFrameProps>(
-  function WindowFrame({ window, children, className }, ref) {
+  function WindowFrame({ window, children, className, isTablet }, ref) {
   const {
     closeWindow,
     minimizeWindow,
@@ -42,8 +43,13 @@ export const WindowFrame = forwardRef<HTMLDivElement, WindowFrameProps>(
     (sizeDelta: { width: number; height: number }, posDelta: { x: number; y: number }) => {
       if (window.isMaximized) return;
       
-      const newWidth = Math.max(400, Math.min(1600, window.size.width + sizeDelta.width));
-      const newHeight = Math.max(300, Math.min(1000, window.size.height + sizeDelta.height));
+    const minWidth = isTablet ? 300 : 400;
+      const maxWidth = isTablet ? 700 : 1600;
+      const minHeight = isTablet ? 250 : 300;
+      const maxHeight = isTablet ? 600 : 1000;
+      
+      const newWidth = Math.max(minWidth, Math.min(maxWidth, window.size.width + sizeDelta.width));
+      const newHeight = Math.max(minHeight, Math.min(maxHeight, window.size.height + sizeDelta.height));
       
       updateWindowSize(window.id, { width: newWidth, height: newHeight });
       
