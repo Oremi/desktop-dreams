@@ -70,9 +70,9 @@ serve(async (req) => {
       );
     }
 
-    const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY');
-    if (!OPENROUTER_API_KEY) {
-      console.error('OPENROUTER_API_KEY not configured');
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      console.error('LOVABLE_API_KEY not configured');
       return new Response(
         JSON.stringify({ error: 'AI service not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -95,18 +95,16 @@ ${JSON.stringify(portfolioContext, null, 2)}
 
 If you don't have specific information, say so honestly. Always be helpful in directing visitors to relevant sections of the portfolio.`;
 
-    console.log('Sending request to OpenRouter with message:', message.substring(0, 100));
+    console.log('Sending request to Lovable AI with message:', message.substring(0, 100));
 
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://portfolio.lovable.app',
-        'X-Title': 'Portfolio AI Assistant'
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.0-flash-exp:free',
+        model: 'google/gemini-2.5-flash',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: message }
@@ -118,7 +116,22 @@ If you don't have specific information, say so honestly. Always be helpful in di
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('OpenRouter error:', response.status, errorText);
+      console.error('Lovable AI error:', response.status, errorText);
+      
+      if (response.status === 429) {
+        return new Response(
+          JSON.stringify({ error: 'AI service is busy. Please try again in a moment.' }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      if (response.status === 402) {
+        return new Response(
+          JSON.stringify({ error: 'AI service temporarily unavailable.' }),
+          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
       return new Response(
         JSON.stringify({ error: 'Failed to get AI response' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
