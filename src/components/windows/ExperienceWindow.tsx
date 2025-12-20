@@ -38,12 +38,12 @@ export function ExperienceWindow() {
               >
                 <div className="flex items-start justify-between mb-2 gap-2 flex-wrap">
                   <div className="min-w-0">
-                    <h3 className="font-semibold text-foreground">{exp.role}</h3>
-                    <p className="text-sm text-primary">{exp.company}</p>
+                    <h3 className="font-semibold text-foreground text-window-body">{exp.role}</h3>
+                    <p className="text-window-small text-primary">{exp.company}</p>
                   </div>
-                  <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded flex-shrink-0">{exp.period}</span>
+                  <span className="text-window-small text-muted-foreground bg-muted px-2 py-1 rounded flex-shrink-0">{exp.period}</span>
                 </div>
-                <p className="text-sm text-muted-foreground mb-3">{exp.description}</p>
+                <p className="text-window-small text-muted-foreground mb-3">{exp.description}</p>
                 <motion.div 
                   className="flex flex-wrap gap-2 transition-all duration-200"
                   layout
@@ -52,7 +52,7 @@ export function ExperienceWindow() {
                   {exp.highlights.map((h, i) => (
                     <motion.span 
                       key={i} 
-                      className="text-xs px-2 py-1 rounded-full bg-success/10 text-success"
+                      className="text-window-small px-2 py-1 rounded-full bg-success/10 text-success"
                       layout
                       transition={{ duration: 0.15 }}
                     >

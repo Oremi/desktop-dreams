@@ -83,10 +83,15 @@ export const WindowFrame = forwardRef<HTMLDivElement, WindowFrameProps>(
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ duration: 0.15, ease: 'easeOut' }}
+      initial={{ opacity: 0, scale: 0.9, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.5, y: 100 }}
+      transition={{ 
+        type: 'spring',
+        damping: 25,
+        stiffness: 300,
+        mass: 0.8
+      }}
       className={cn(
         'absolute flex flex-col overflow-hidden window-shadow gpu-accelerate',
         !window.isMaximized && 'rounded-xl border border-window-border',
@@ -155,7 +160,7 @@ export const WindowFrame = forwardRef<HTMLDivElement, WindowFrameProps>(
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-auto bg-window text-window-foreground transition-all duration-200 ease-out">
+      <div className="flex-1 overflow-auto bg-window text-window-foreground transition-all duration-200 ease-out window-container">
         {children}
       </div>
 

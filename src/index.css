@@ -217,6 +217,32 @@
     backface-visibility: hidden;
   }
 
+  /* Container query utilities for responsive window content */
+  .window-container {
+    container-type: inline-size;
+  }
+
+  /* Scalable typography using clamp */
+  .text-window-title {
+    font-size: clamp(1.25rem, 3cqi, 2rem);
+    line-height: 1.2;
+  }
+
+  .text-window-subtitle {
+    font-size: clamp(0.875rem, 2cqi, 1.125rem);
+    line-height: 1.4;
+  }
+
+  .text-window-body {
+    font-size: clamp(0.75rem, 1.8cqi, 1rem);
+    line-height: 1.5;
+  }
+
+  .text-window-small {
+    font-size: clamp(0.625rem, 1.5cqi, 0.875rem);
+    line-height: 1.4;
+  }
+
   /* Animation utilities */
   .animate-scale-in {
     animation: scale-in 0.2s ease-out;

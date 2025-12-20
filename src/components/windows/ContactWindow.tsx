@@ -37,7 +37,7 @@ export function ContactWindow() {
         transition={{ duration: 0.2 }}
       >
         <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
-        <span className="text-sm text-success font-medium">Online</span>
+        <span className="text-window-small text-success font-medium">Online</span>
       </motion.div>
 
       <motion.form 
@@ -83,7 +83,7 @@ export function ContactWindow() {
         layout
         transition={{ duration: 0.2 }}
       >
-        <p className="text-sm text-muted-foreground mb-3">Or reach out directly:</p>
+        <p className="text-window-small text-muted-foreground mb-3">Or reach out directly:</p>
         <motion.div 
           className="flex items-center gap-3 flex-wrap"
           layout

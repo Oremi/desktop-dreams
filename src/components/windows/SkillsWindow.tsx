@@ -23,7 +23,7 @@ export function SkillsWindow() {
             layout
             transition={{ duration: 0.2 }}
           >
-            <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+            <h3 className="text-window-small font-semibold text-foreground mb-3 flex items-center gap-2">
               <span className={`w-2 h-2 rounded-full ${category === 'Frontend' ? 'bg-primary' : category === 'Backend' ? 'bg-accent' : category === 'Tools' ? 'bg-success' : 'bg-muted-foreground'}`} />
               {category}
             </h3>
@@ -35,7 +35,7 @@ export function SkillsWindow() {
               {skills.map((skill) => (
                 <motion.span 
                   key={skill} 
-                  className={`px-3 py-1.5 rounded-lg border text-sm font-medium ${SKILL_COLORS[category] || SKILL_COLORS.Other}`}
+                  className={`px-3 py-1.5 rounded-lg border text-window-small font-medium ${SKILL_COLORS[category] || SKILL_COLORS.Other}`}
                   layout
                   transition={{ duration: 0.15 }}
                 >
