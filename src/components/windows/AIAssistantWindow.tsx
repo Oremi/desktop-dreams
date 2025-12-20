@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Send, Sparkles, Trash2, AlertCircle } from 'lucide-react';
+import { Send, Sparkles, Trash2, AlertCircle, Settings } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import { useAIChat, ChatMessage } from '@/hooks/useAIChat';
 import configData from '@/data/config.json';
 import projectsData from '@/data/projects.json';
@@ -25,7 +26,7 @@ export function AIAssistantWindow() {
     projects: projectsData.projects
   };
 
-  const { messages, isLoading, error, sendMessage, clearMessages } = useAIChat(portfolioContext);
+  const { messages, isLoading, error, configError, sendMessage, clearMessages } = useAIChat(portfolioContext);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -45,6 +46,30 @@ export function AIAssistantWindow() {
       sendMessage(prompt);
     }
   };
+
+  // Show configuration error fallback UI
+  if (configError) {
+    return (
+      <motion.div 
+        className="flex flex-col h-full items-center justify-center p-6 text-center"
+        layout
+        transition={{ duration: 0.2 }}
+      >
+        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+          <Settings className="w-8 h-8 text-muted-foreground" />
+        </div>
+        <h3 className="text-lg font-semibold mb-2">AI Assistant Unavailable</h3>
+        <p className="text-sm text-muted-foreground mb-4 max-w-xs">
+          The AI assistant is not configured on this deployment. This feature requires an API key to be set up by the site owner.
+        </p>
+        <div className="text-xs text-muted-foreground/70 space-y-1">
+          <p>If you're the site owner:</p>
+          <p className="font-mono bg-muted px-2 py-1 rounded">OPENROUTER_API_KEY</p>
+          <p>needs to be configured in your hosting environment.</p>
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div 
@@ -169,7 +194,13 @@ function MessageBubble({ message }: { message: ChatMessage }) {
           ? 'rounded-tr-sm bg-primary text-primary-foreground' 
           : 'rounded-tl-sm bg-muted'
       }`}>
-        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+        {isUser ? (
+          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+        ) : (
+          <div className="text-sm prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-headings:my-2 prose-pre:my-2 prose-pre:bg-background/50 prose-pre:p-2 prose-pre:rounded prose-code:bg-background/50 prose-code:px-1 prose-code:rounded prose-code:before:content-none prose-code:after:content-none">
+            <ReactMarkdown>{message.content}</ReactMarkdown>
+          </div>
+        )}
       </div>
     </div>
   );
