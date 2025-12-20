@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, forwardRef } from 'react';
 import { motion } from 'framer-motion';
 import { Minus, Square, X, Maximize2 } from 'lucide-react';
 import { WindowState } from '@/types/os';
@@ -13,7 +13,8 @@ interface WindowFrameProps {
   className?: string;
 }
 
-export function WindowFrame({ window, children, className }: WindowFrameProps) {
+export const WindowFrame = forwardRef<HTMLDivElement, WindowFrameProps>(
+  function WindowFrame({ window, children, className }, ref) {
   const {
     closeWindow,
     minimizeWindow,
@@ -29,12 +30,12 @@ export function WindowFrame({ window, children, className }: WindowFrameProps) {
   const handleDrag = useCallback(
     (delta: { x: number; y: number }) => {
       if (window.isMaximized) return;
-      updateWindowPosition(window.id, {
-        x: window.position.x + delta.x,
-        y: window.position.y + delta.y,
-      });
+      updateWindowPosition(window.id, (current) => ({
+        x: current.x + delta.x,
+        y: current.y + delta.y,
+      }));
     },
-    [window.id, window.position, window.isMaximized, updateWindowPosition]
+    [window.id, window.isMaximized, updateWindowPosition]
   );
 
   const handleResize = useCallback(
@@ -196,4 +197,4 @@ export function WindowFrame({ window, children, className }: WindowFrameProps) {
       )}
     </motion.div>
   );
-}
+});

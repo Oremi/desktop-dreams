@@ -10,7 +10,10 @@ interface WindowContextType {
   maximizeWindow: (id: string) => void;
   restoreWindow: (id: string) => void;
   focusWindow: (id: string) => void;
-  updateWindowPosition: (id: string, position: { x: number; y: number }) => void;
+  updateWindowPosition: (
+    id: string,
+    positionOrUpdater: { x: number; y: number } | ((current: { x: number; y: number }) => { x: number; y: number })
+  ) => void;
   updateWindowSize: (id: string, size: { width: number; height: number }) => void;
 }
 
@@ -104,9 +107,19 @@ export function WindowProvider({ children }: { children: ReactNode }) {
   }, [nextZIndex]);
 
   const updateWindowPosition = useCallback(
-    (id: string, position: { x: number; y: number }) => {
+    (
+      id: string,
+      positionOrUpdater: { x: number; y: number } | ((current: { x: number; y: number }) => { x: number; y: number })
+    ) => {
       setWindows((prev) =>
-        prev.map((w) => (w.id === id ? { ...w, position } : w))
+        prev.map((w) => {
+          if (w.id !== id) return w;
+          const newPosition =
+            typeof positionOrUpdater === 'function'
+              ? positionOrUpdater(w.position)
+              : positionOrUpdater;
+          return { ...w, position: newPosition };
+        })
       );
     },
     []
