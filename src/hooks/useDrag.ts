@@ -3,7 +3,6 @@ import { useCallback, useRef } from 'react';
 interface UseDragOptions {
   onDragStart?: () => void;
   onDragEnd?: () => void;
-  bounds?: { left: number; top: number; right: number; bottom: number };
 }
 
 export function useDrag(
@@ -12,10 +11,16 @@ export function useDrag(
 ) {
   const isDragging = useRef(false);
   const startPos = useRef({ x: 0, y: 0 });
+  const rafId = useRef<number | null>(null);
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
+      // Only allow left mouse button
+      if (e.button !== 0) return;
+      
       e.preventDefault();
+      e.stopPropagation();
+      
       isDragging.current = true;
       startPos.current = { x: e.clientX, y: e.clientY };
       options.onDragStart?.();
@@ -23,20 +28,38 @@ export function useDrag(
       const handleMouseMove = (e: MouseEvent) => {
         if (!isDragging.current) return;
         
-        const deltaX = e.clientX - startPos.current.x;
-        const deltaY = e.clientY - startPos.current.y;
+        // Cancel any pending animation frame
+        if (rafId.current) {
+          cancelAnimationFrame(rafId.current);
+        }
         
-        startPos.current = { x: e.clientX, y: e.clientY };
-        onDrag({ x: deltaX, y: deltaY });
+        // Use requestAnimationFrame for smooth updates
+        rafId.current = requestAnimationFrame(() => {
+          const deltaX = e.clientX - startPos.current.x;
+          const deltaY = e.clientY - startPos.current.y;
+          
+          startPos.current = { x: e.clientX, y: e.clientY };
+          onDrag({ x: deltaX, y: deltaY });
+        });
       };
 
       const handleMouseUp = () => {
         isDragging.current = false;
+        
+        if (rafId.current) {
+          cancelAnimationFrame(rafId.current);
+          rafId.current = null;
+        }
+        
         options.onDragEnd?.();
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
       };
 
+      document.body.style.cursor = 'grabbing';
+      document.body.style.userSelect = 'none';
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
     },
@@ -47,6 +70,8 @@ export function useDrag(
     (e: React.TouchEvent) => {
       if (e.touches.length !== 1) return;
       
+      e.stopPropagation();
+      
       isDragging.current = true;
       const touch = e.touches[0];
       startPos.current = { x: touch.clientX, y: touch.clientY };
@@ -55,16 +80,30 @@ export function useDrag(
       const handleTouchMove = (e: TouchEvent) => {
         if (!isDragging.current || e.touches.length !== 1) return;
         
-        const touch = e.touches[0];
-        const deltaX = touch.clientX - startPos.current.x;
-        const deltaY = touch.clientY - startPos.current.y;
+        e.preventDefault();
         
-        startPos.current = { x: touch.clientX, y: touch.clientY };
-        onDrag({ x: deltaX, y: deltaY });
+        if (rafId.current) {
+          cancelAnimationFrame(rafId.current);
+        }
+        
+        rafId.current = requestAnimationFrame(() => {
+          const touch = e.touches[0];
+          const deltaX = touch.clientX - startPos.current.x;
+          const deltaY = touch.clientY - startPos.current.y;
+          
+          startPos.current = { x: touch.clientX, y: touch.clientY };
+          onDrag({ x: deltaX, y: deltaY });
+        });
       };
 
       const handleTouchEnd = () => {
         isDragging.current = false;
+        
+        if (rafId.current) {
+          cancelAnimationFrame(rafId.current);
+          rafId.current = null;
+        }
+        
         options.onDragEnd?.();
         document.removeEventListener('touchmove', handleTouchMove);
         document.removeEventListener('touchend', handleTouchEnd);
