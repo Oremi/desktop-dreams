@@ -1,4 +1,4 @@
-// Vercel API route for AI chat (for GitHub/Vercel deployment)
+// Vercel API route for AI chat with streaming (for GitHub/Vercel deployment)
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 // Simple in-memory rate limiting (per IP, 15 requests/hour)
@@ -26,7 +26,7 @@ function checkRateLimit(ip: string): { allowed: boolean; remaining: number; rese
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Handle CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -62,7 +62,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
     if (!OPENROUTER_API_KEY) {
       console.error('OPENROUTER_API_KEY not configured');
-      return res.status(500).json({ error: 'AI service not configured' });
+      return res.status(500).json({ error: 'AI service not configured. Please set OPENROUTER_API_KEY environment variable.' });
     }
 
     // Build system prompt with portfolio context
@@ -81,12 +81,14 @@ ${JSON.stringify(portfolioContext, null, 2)}
 
 If you don't have specific information, say so honestly. Always be helpful in directing visitors to relevant sections of the portfolio.`;
 
+    console.log('Sending streaming request to OpenRouter');
+
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://portfolio.lovable.app',
+        'HTTP-Referer': req.headers.origin || 'https://portfolio.lovable.app',
         'X-Title': 'Portfolio AI Assistant'
       },
       body: JSON.stringify({
@@ -95,7 +97,7 @@ If you don't have specific information, say so honestly. Always be helpful in di
           { role: 'system', content: systemPrompt },
           { role: 'user', content: message }
         ],
-        stream: false,
+        stream: true,
         max_tokens: 500
       })
     });
@@ -103,13 +105,43 @@ If you don't have specific information, say so honestly. Always be helpful in di
     if (!response.ok) {
       const errorText = await response.text();
       console.error('OpenRouter error:', response.status, errorText);
+      
+      if (response.status === 429) {
+        return res.status(429).json({ 
+          error: 'rate_limit_exceeded',
+          message: 'AI service is busy. Please try again in a moment.'
+        });
+      }
+      
       return res.status(500).json({ error: 'Failed to get AI response' });
     }
 
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content || 'Sorry, I could not generate a response.';
+    // Set up SSE streaming response
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
 
-    return res.status(200).json({ content });
+    // Stream the response from OpenRouter to the client
+    const reader = response.body?.getReader();
+    if (!reader) {
+      return res.status(500).json({ error: 'Failed to read AI response stream' });
+    }
+
+    const decoder = new TextDecoder();
+    
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        const chunk = decoder.decode(value, { stream: true });
+        res.write(chunk);
+      }
+    } catch (streamError) {
+      console.error('Stream error:', streamError);
+    } finally {
+      res.end();
+    }
 
   } catch (error) {
     console.error('AI chat error:', error);

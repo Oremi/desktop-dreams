@@ -1,5 +1,4 @@
 import { useState, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 
 export interface ChatMessage {
   id: string;
@@ -14,6 +13,42 @@ interface PortfolioContext {
   skills: Record<string, unknown>;
   experience: unknown[];
   projects: unknown[];
+}
+
+// Detect deployment environment
+function getAIEndpoint(): { url: string; type: 'supabase' | 'vercel' | 'netlify' } {
+  // Check for explicit environment variable first
+  const deployEnv = import.meta.env.VITE_DEPLOYMENT_ENV;
+  
+  if (deployEnv === 'vercel') {
+    return { url: '/api/chat', type: 'vercel' };
+  }
+  
+  if (deployEnv === 'netlify') {
+    return { url: '/.netlify/functions/chat', type: 'netlify' };
+  }
+  
+  // Auto-detect based on URL patterns
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+  
+  // Vercel deployments
+  if (hostname.includes('.vercel.app') || hostname.includes('.vercel.') || deployEnv === 'vercel') {
+    return { url: '/api/chat', type: 'vercel' };
+  }
+  
+  // Netlify deployments
+  if (hostname.includes('.netlify.app') || hostname.includes('.netlify.') || deployEnv === 'netlify') {
+    return { url: '/.netlify/functions/chat', type: 'netlify' };
+  }
+  
+  // Default to Supabase edge function (Lovable deployment)
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  if (supabaseUrl) {
+    return { url: `${supabaseUrl}/functions/v1/ai-chat`, type: 'supabase' };
+  }
+  
+  // Fallback to Vercel API route for local development without Supabase
+  return { url: '/api/chat', type: 'vercel' };
 }
 
 export function useAIChat(portfolioContext: PortfolioContext) {
@@ -38,20 +73,30 @@ export function useAIChat(portfolioContext: PortfolioContext) {
     setIsLoading(true);
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
-          },
-          body: JSON.stringify({
-            message: userMessage,
-            portfolioContext
-          })
+      const endpoint = getAIEndpoint();
+      console.log(`AI Chat using ${endpoint.type} endpoint:`, endpoint.url);
+      
+      // Build headers based on endpoint type
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+      
+      // Add auth header for Supabase endpoint
+      if (endpoint.type === 'supabase') {
+        const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+        if (anonKey) {
+          headers['Authorization'] = `Bearer ${anonKey}`;
         }
-      );
+      }
+
+      const response = await fetch(endpoint.url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          message: userMessage,
+          portfolioContext
+        })
+      });
 
       // Handle rate limit
       if (response.status === 429) {
@@ -65,57 +110,73 @@ export function useAIChat(portfolioContext: PortfolioContext) {
         throw new Error('Failed to get response');
       }
 
-      // Create assistant message placeholder
-      const assistantMsg: ChatMessage = {
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        content: '',
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, assistantMsg]);
+      // Check if response is streaming (SSE) or JSON
+      const contentType = response.headers.get('content-type') || '';
+      
+      if (contentType.includes('text/event-stream')) {
+        // Handle streaming response (Supabase edge function & updated Vercel/Netlify)
+        const assistantMsg: ChatMessage = {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: '',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, assistantMsg]);
 
-      // Stream the response
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-      let fullContent = '';
-      let buffer = '';
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        let fullContent = '';
+        let buffer = '';
 
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
 
-          buffer += decoder.decode(value, { stream: true });
-          
-          // Process complete lines
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || '';
-
-          for (const line of lines) {
-            if (!line.trim() || line.startsWith(':')) continue;
-            if (!line.startsWith('data: ')) continue;
+            buffer += decoder.decode(value, { stream: true });
             
-            const jsonStr = line.slice(6).trim();
-            if (jsonStr === '[DONE]') continue;
+            // Process complete lines
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || '';
 
-            try {
-              const parsed = JSON.parse(jsonStr);
-              const content = parsed.choices?.[0]?.delta?.content;
-              if (content) {
-                fullContent += content;
-                setMessages(prev => 
-                  prev.map(m => 
-                    m.id === assistantMsg.id 
-                      ? { ...m, content: fullContent }
-                      : m
-                  )
-                );
+            for (const line of lines) {
+              if (!line.trim() || line.startsWith(':')) continue;
+              if (!line.startsWith('data: ')) continue;
+              
+              const jsonStr = line.slice(6).trim();
+              if (jsonStr === '[DONE]') continue;
+
+              try {
+                const parsed = JSON.parse(jsonStr);
+                const content = parsed.choices?.[0]?.delta?.content;
+                if (content) {
+                  fullContent += content;
+                  setMessages(prev => 
+                    prev.map(m => 
+                      m.id === assistantMsg.id 
+                        ? { ...m, content: fullContent }
+                        : m
+                    )
+                  );
+                }
+              } catch {
+                // Partial JSON, will be handled in next chunk
               }
-            } catch {
-              // Partial JSON, will be handled in next chunk
             }
           }
         }
+      } else {
+        // Handle JSON response (legacy non-streaming)
+        const data = await response.json();
+        const content = data.content || data.choices?.[0]?.message?.content || 'Sorry, I could not generate a response.';
+        
+        const assistantMsg: ChatMessage = {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, assistantMsg]);
       }
 
     } catch (err) {
