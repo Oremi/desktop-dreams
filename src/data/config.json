@@ -1,10 +1,10 @@
 {
   "user": {
-    "name": "Your Name",
-    "title": "Full-Stack Developer",
-    "email": "hello@portfolio.dev",
-    "location": "San Francisco, CA",
-    "phone": "",
+    "name": "Godwin Omolei",
+    "title": "Freelance Dev",
+    "email": "oremi64@gmail.com",
+    "location": "Kwara, Nigeria",
+    "phone": "+2349071434506",
     "bio": [
       "Full-stack developer specializing in React and Node.js with 5+ years of experience building scalable web applications.",
       "Currently focused on creating AI-powered tools that help developers work more efficiently. I believe in writing clean, maintainable code and building products that genuinely solve problems.",
@@ -14,9 +14,9 @@
     "status": "Available for opportunities"
   },
   "social": {
-    "github": "username",
-    "twitter": "handle",
-    "linkedin": "in/username",
+    "github": "oremi",
+    "twitter": "c_kingkai",
+    "linkedin": "in/g0dw1n",
     "website": ""
   },
   "skills": {
