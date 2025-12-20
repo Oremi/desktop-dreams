@@ -55,6 +55,7 @@ export function useAIChat(portfolioContext: PortfolioContext) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [configError, setConfigError] = useState<boolean>(false);
 
   const sendMessage = useCallback(async (userMessage: string) => {
     if (!userMessage.trim() || isLoading) return;
@@ -106,7 +107,28 @@ export function useAIChat(portfolioContext: PortfolioContext) {
         return;
       }
 
+      // Handle API key not configured
+      if (response.status === 503) {
+        const data = await response.json();
+        if (data.error?.includes('not configured') || data.message?.includes('not configured')) {
+          setConfigError(true);
+          setError('AI service is not configured on this deployment.');
+          // Remove the user message since we can't process it
+          setMessages(prev => prev.filter(m => m.id !== userMsg.id));
+          setIsLoading(false);
+          return;
+        }
+      }
+
       if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        if (data.error?.includes('not configured') || data.message?.includes('not configured')) {
+          setConfigError(true);
+          setError('AI service is not configured on this deployment.');
+          setMessages(prev => prev.filter(m => m.id !== userMsg.id));
+          setIsLoading(false);
+          return;
+        }
         throw new Error('Failed to get response');
       }
 
@@ -190,12 +212,14 @@ export function useAIChat(portfolioContext: PortfolioContext) {
   const clearMessages = useCallback(() => {
     setMessages([]);
     setError(null);
+    setConfigError(false);
   }, []);
 
   return {
     messages,
     isLoading,
     error,
+    configError,
     sendMessage,
     clearMessages
   };
