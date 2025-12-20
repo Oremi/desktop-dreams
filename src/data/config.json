@@ -1,0 +1,59 @@
+{
+  "user": {
+    "name": "Your Name",
+    "title": "Full-Stack Developer",
+    "email": "hello@portfolio.dev",
+    "location": "San Francisco, CA",
+    "phone": "",
+    "bio": [
+      "Full-stack developer specializing in React and Node.js with 5+ years of experience building scalable web applications.",
+      "Currently focused on creating AI-powered tools that help developers work more efficiently. I believe in writing clean, maintainable code and building products that genuinely solve problems.",
+      "When I'm not coding, you'll find me exploring new technologies, contributing to open source, or sharing knowledge with the developer community."
+    ],
+    "avatar": "",
+    "status": "Available for opportunities"
+  },
+  "social": {
+    "github": "username",
+    "twitter": "handle",
+    "linkedin": "in/username",
+    "website": ""
+  },
+  "skills": {
+    "Frontend": ["React", "TypeScript", "Next.js", "Tailwind CSS", "Framer Motion"],
+    "Backend": ["Node.js", "Express", "Python", "PostgreSQL", "MongoDB"],
+    "Tools": ["Git", "Docker", "AWS", "Vercel", "Figma"],
+    "Other": ["REST APIs", "GraphQL", "CI/CD", "Agile", "Testing"]
+  },
+  "experience": [
+    {
+      "id": 1,
+      "company": "Tech Company",
+      "role": "Senior Full-Stack Developer",
+      "period": "2023 - Present",
+      "description": "Leading development of customer-facing applications, implementing new features, and mentoring junior developers.",
+      "highlights": ["Increased performance by 40%", "Led team of 5 developers", "Shipped 20+ features"]
+    },
+    {
+      "id": 2,
+      "company": "Startup Inc",
+      "role": "Full-Stack Developer",
+      "period": "2021 - 2023",
+      "description": "Built core product features from scratch, worked closely with design team, and improved code quality.",
+      "highlights": ["Built MVP in 3 months", "Grew user base 10x", "Reduced bugs by 60%"]
+    },
+    {
+      "id": 3,
+      "company": "Agency Co",
+      "role": "Frontend Developer",
+      "period": "2019 - 2021",
+      "description": "Developed responsive web applications for various clients, focusing on user experience and accessibility.",
+      "highlights": ["Delivered 15+ client projects", "99% client satisfaction", "Accessibility certified"]
+    }
+  ],
+  "theme": {
+    "darkMode": true,
+    "accentColor": "blue",
+    "wallpaper": "gradient"
+  }
+}
