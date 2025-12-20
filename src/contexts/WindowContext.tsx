@@ -14,7 +14,10 @@ interface WindowContextType {
     id: string,
     positionOrUpdater: { x: number; y: number } | ((current: { x: number; y: number }) => { x: number; y: number })
   ) => void;
-  updateWindowSize: (id: string, size: { width: number; height: number }) => void;
+  updateWindowSize: (
+    id: string,
+    sizeOrUpdater: { width: number; height: number } | ((current: { width: number; height: number }) => { width: number; height: number })
+  ) => void;
 }
 
 const WindowContext = createContext<WindowContextType | undefined>(undefined);
@@ -134,9 +137,19 @@ export function WindowProvider({ children }: { children: ReactNode }) {
   );
 
   const updateWindowSize = useCallback(
-    (id: string, size: { width: number; height: number }) => {
+    (
+      id: string,
+      sizeOrUpdater: { width: number; height: number } | ((current: { width: number; height: number }) => { width: number; height: number })
+    ) => {
       setWindows((prev) =>
-        prev.map((w) => (w.id === id ? { ...w, size } : w))
+        prev.map((w) => {
+          if (w.id !== id) return w;
+          const newSize =
+            typeof sizeOrUpdater === 'function'
+              ? sizeOrUpdater(w.size)
+              : sizeOrUpdater;
+          return { ...w, size: newSize };
+        })
       );
     },
     []
