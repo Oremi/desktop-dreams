@@ -1,8 +1,9 @@
 import React from 'react';
 import { format } from 'date-fns';
-import { Github, Linkedin, Twitter } from 'lucide-react';
+import { Github, Linkedin, Twitter, Sun, Moon } from 'lucide-react';
 import { WindowState } from '@/types/os';
 import { useWindowContext } from '@/contexts/WindowContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { cn } from '@/lib/utils';
 import configData from '@/data/config.json';
 
@@ -12,6 +13,7 @@ interface TaskbarProps {
 
 export function Taskbar({ className }: TaskbarProps) {
   const { windows, restoreWindow, focusWindow, activeWindowId } = useWindowContext();
+  const { isDarkMode, toggleDarkMode } = useTheme();
   const [time, setTime] = React.useState(new Date());
 
   React.useEffect(() => {
@@ -97,7 +99,18 @@ export function Taskbar({ className }: TaskbarProps) {
       </div>
 
       {/* Right - System Tray */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
+        <button
+          onClick={toggleDarkMode}
+          className="p-2 rounded-lg hover:bg-muted transition-colors"
+          aria-label="Toggle dark mode"
+        >
+          {isDarkMode ? (
+            <Sun className="w-4 h-4 text-taskbar-foreground" />
+          ) : (
+            <Moon className="w-4 h-4 text-taskbar-foreground" />
+          )}
+        </button>
         <div className="text-right">
           <div className="text-xs font-medium text-taskbar-foreground">
             {format(time, 'h:mm a')}
