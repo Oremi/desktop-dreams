@@ -155,7 +155,7 @@ export const WindowFrame = forwardRef<HTMLDivElement, WindowFrameProps>(
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-auto bg-window text-window-foreground">
+      <div className="flex-1 overflow-auto bg-window text-window-foreground transition-all duration-200 ease-out">
         {children}
       </div>
 
