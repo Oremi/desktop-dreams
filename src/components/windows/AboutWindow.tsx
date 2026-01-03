@@ -66,7 +66,7 @@ export function AboutWindow() {
           layout
           transition={{ duration: 0.2 }}
         >
-          {configData.skills.Frontend.slice(0, 4).map((skill) => (
+          {configData.skills["IT Support"].slice(0, 3).map((skill) => (
             <motion.span 
               key={skill} 
               className="px-3 py-1 rounded-full bg-primary/10 text-primary text-window-small font-medium"
@@ -76,7 +76,7 @@ export function AboutWindow() {
               {skill}
             </motion.span>
           ))}
-          {configData.skills.Backend.slice(0, 2).map((skill) => (
+          {configData.skills["Data & Tools"].slice(0, 3).map((skill) => (
             <motion.span 
               key={skill} 
               className="px-3 py-1 rounded-full bg-accent/10 text-accent text-window-small font-medium"

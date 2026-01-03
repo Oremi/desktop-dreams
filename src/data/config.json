@@ -1,14 +1,14 @@
 {
   "user": {
     "name": "Godwin Omolei",
-    "title": "Freelance Dev",
+    "title": "IT Support Specialist | Aspiring Data Analyst",
     "email": "oremi64@gmail.com",
-    "location": "Kwara, Nigeria",
+    "location": "Ilorin, Nigeria",
     "phone": "+2349071434506",
     "bio": [
-      "Full-stack developer specializing in React and Node.js with 5+ years of experience building scalable web applications.",
-      "Currently focused on creating AI-powered tools that help developers work more efficiently. I believe in writing clean, maintainable code and building products that genuinely solve problems.",
-      "When I'm not coding, you'll find me exploring new technologies, contributing to open source, or sharing knowledge with the developer community."
+      "Highly motivated IT professional with a B.Sc. in Information and Communication Science from the University of Ilorin (GPA: 4.10/5.00). Strong foundation in IT support, quality assurance, and technical documentation.",
+      "Experienced in troubleshooting complex technical issues, conducting thorough product testing, and delivering effective user training. Skilled in creating comprehensive documentation including video tutorials and technical articles.",
+      "Currently developing skills in Python, Power BI, and SQL to transition into data analysis. Eager to leverage analytical capabilities and problem-solving skills to drive data-informed decisions."
     ],
     "avatar": "",
     "status": "Available for opportunities"
@@ -20,35 +20,27 @@
     "website": ""
   },
   "skills": {
-    "Frontend": ["React", "TypeScript", "Next.js", "Tailwind CSS", "Framer Motion"],
-    "Backend": ["Node.js", "Express", "Python", "PostgreSQL", "MongoDB"],
-    "Tools": ["Git", "Docker", "AWS", "Vercel", "Figma"],
-    "Other": ["REST APIs", "GraphQL", "CI/CD", "Agile", "Testing"]
+    "IT Support": ["Technical Support", "Hardware & Software Installation", "System Maintenance", "Troubleshooting"],
+    "QA & Testing": ["Manual Testing", "Product Testing", "Quality Assurance", "Bug Documentation"],
+    "Data & Tools": ["SQL", "Python", "Power BI", "Git", "Microsoft Office Suite", "Data Analysis"],
+    "Documentation": ["Technical Writing", "Video Tutorials", "Product Manuals", "Client Presentations"]
   },
   "experience": [
     {
       "id": 1,
-      "company": "Tech Company",
-      "role": "Senior Full-Stack Developer",
-      "period": "2023 - Present",
-      "description": "Leading development of customer-facing applications, implementing new features, and mentoring junior developers.",
-      "highlights": ["Increased performance by 40%", "Led team of 5 developers", "Shipped 20+ features"]
+      "company": "Datasek Systems Limited",
+      "role": "IT Support Specialist",
+      "period": "Sep 2023 - Dec 2023",
+      "description": "Provided comprehensive IT support and product management assistance, focusing on technical documentation, testing, and client engagement to ensure product quality and user satisfaction.",
+      "highlights": ["Authored technical articles and graphical walkthroughs for company blog", "Managed Git staging branches for agile development cycles", "Conducted thorough product testing and delivered virtual client presentations"]
     },
     {
       "id": 2,
-      "company": "Startup Inc",
-      "role": "Full-Stack Developer",
-      "period": "2021 - 2023",
-      "description": "Built core product features from scratch, worked closely with design team, and improved code quality.",
-      "highlights": ["Built MVP in 3 months", "Grew user base 10x", "Reduced bugs by 60%"]
-    },
-    {
-      "id": 3,
-      "company": "Agency Co",
-      "role": "Frontend Developer",
-      "period": "2019 - 2021",
-      "description": "Developed responsive web applications for various clients, focusing on user experience and accessibility.",
-      "highlights": ["Delivered 15+ client projects", "99% client satisfaction", "Accessibility certified"]
+      "company": "Datasek Systems Limited",
+      "role": "Information Technology Intern",
+      "period": "Nov 2021 - Apr 2022",
+      "description": "Gained hands-on experience in IT support, quality assurance, and user training, contributing to smooth technology implementation and problem resolution.",
+      "highlights": ["Resolved critical database error minimizing operational disruption", "Conducted multiple Zoom training sessions on business management software", "Performed manual QA testing and developed comprehensive software manuals"]
     }
   ],
   "theme": {
