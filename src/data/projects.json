@@ -6,7 +6,7 @@
       "description": "This portfolio website you're viewing right now! A Windows 11-inspired desktop experience with an AI-powered assistant built with React and TypeScript.",
       "year": 2025,
       "tech": ["React", "TypeScript", "Tailwind CSS", "Framer Motion", "Supabase"],
-      "framerLink": "",
+      "framerLink": "https://eddieo.lovable.app",
       "githubLink": "https://github.com/oremi/desktop-dreams",
       "icon": "💻",
       "category": "personal",
@@ -18,9 +18,21 @@
       "description": "An AI-powered platform that helps users create and send messages to loved ones",
       "year": 2025,
       "tech": ["React", "TypeScript", "Tailwind CSS", "Framer Motion", "Supabase"],
-      "framerLink": "",
+      "framerLink": "https://elovesend.lovable.app",
       "githubLink": "https://github.com/oremi/e-love",
       "icon": "💖",
+      "category": "personal",
+      "featured": true
+    },
+    {
+      "id": 3,
+      "name": "Solar Estimator Pro",
+      "description": "A localized solar design and estimation platform built for the Nigerian energy market. Helps homeowners and installers accurately size solar systems, estimate costs in Naira, and make informed decisions using AI-assisted recommendations.",
+      "year": 2025,
+      "tech": ["React", "TypeScript", "Tailwind CSS", "Supabase", "AI"],
+      "framerLink": "https://solarsave.lovable.app",
+      "githubLink": "",
+      "icon": "☀️",
       "category": "personal",
       "featured": true
     }
