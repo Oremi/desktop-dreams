@@ -30,9 +30,13 @@
       "id": 1,
       "company": "Datasek Systems Limited",
       "role": "IT Support Specialist",
-      "period": "Sep 2023 - Dec 2023",
+      "period": "Sep 2023 - Feb 2024",
       "description": "Provided comprehensive IT support and product management assistance, focusing on technical documentation, testing, and client engagement to ensure product quality and user satisfaction.",
-      "highlights": ["Authored technical articles and graphical walkthroughs for company blog", "Managed Git staging branches for agile development cycles", "Conducted thorough product testing and delivered virtual client presentations"]
+      "highlights": [
+        "Authored technical articles and graphical walkthroughs for company blog",
+        "Managed Git staging branches for agile development cycles",
+        "Conducted thorough product testing and delivered virtual client presentations"
+      ]
     },
     {
       "id": 2,
@@ -40,7 +44,11 @@
       "role": "Information Technology Intern",
       "period": "Nov 2021 - Apr 2022",
       "description": "Gained hands-on experience in IT support, quality assurance, and user training, contributing to smooth technology implementation and problem resolution.",
-      "highlights": ["Resolved critical database error minimizing operational disruption", "Conducted multiple Zoom training sessions on business management software", "Performed manual QA testing and developed comprehensive software manuals"]
+      "highlights": [
+        "Resolved critical database error minimizing operational disruption",
+        "Conducted multiple Zoom training sessions on business management software",
+        "Performed manual QA testing and developed comprehensive software manuals"
+      ]
     }
   ],
   "theme": {
