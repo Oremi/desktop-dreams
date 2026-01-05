@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
-import { Lock, Mail, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { Lock, Mail, Eye, EyeOff, ArrowLeft, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,6 +16,8 @@ const authSchema = z.object({
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [isFirstUserSetup, setIsFirstUserSetup] = useState(false);
+  const [isCheckingSetup, setIsCheckingSetup] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -23,6 +25,34 @@ const Auth = () => {
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => {
+    const checkFirstUserSetup = async () => {
+      try {
+        // Check if any user roles exist (if not, this is first-time setup)
+        const { count, error } = await supabase
+          .from('user_roles')
+          .select('*', { count: 'exact', head: true });
+        
+        if (error) {
+          console.error('Error checking setup status:', error);
+          setIsFirstUserSetup(false);
+        } else {
+          setIsFirstUserSetup(count === 0);
+          if (count === 0) {
+            setIsLogin(false); // Force signup mode for first user
+          }
+        }
+      } catch (err) {
+        console.error('Error checking setup status:', err);
+        setIsFirstUserSetup(false);
+      } finally {
+        setIsCheckingSetup(false);
+      }
+    };
+
+    checkFirstUserSetup();
+  }, []);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -112,10 +142,14 @@ const Auth = () => {
           }
         } else {
           toast({
-            title: "Account Created",
-            description: "You can now sign in with your credentials.",
+            title: isFirstUserSetup ? "Admin Account Created" : "Account Created",
+            description: isFirstUserSetup 
+              ? "You are now the admin. Signing you in..." 
+              : "You can now sign in with your credentials.",
           });
-          setIsLogin(true);
+          if (!isFirstUserSetup) {
+            setIsLogin(true);
+          }
         }
       }
     } catch (error) {
@@ -129,6 +163,29 @@ const Auth = () => {
     }
   };
 
+  if (isCheckingSetup) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
+
+  const getTitle = () => {
+    if (isFirstUserSetup) return 'Initial Setup';
+    return isLogin ? 'Admin Login' : 'Admin Sign Up';
+  };
+
+  const getHeading = () => {
+    if (isFirstUserSetup) return 'Welcome!';
+    return isLogin ? 'Welcome Back' : 'Create Account';
+  };
+
+  const getSubheading = () => {
+    if (isFirstUserSetup) return 'Create the first admin account to get started';
+    return isLogin ? 'Sign in to access admin panel' : 'Sign up for admin access';
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <motion.div
@@ -138,22 +195,31 @@ const Auth = () => {
       >
         <div className="bg-card border border-border rounded-lg shadow-lg overflow-hidden">
           <div className="bg-muted px-4 py-2 flex items-center gap-2 border-b border-border">
-            <Lock className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">
-              {isLogin ? 'Admin Login' : 'Admin Sign Up'}
-            </span>
+            {isFirstUserSetup ? (
+              <Shield className="h-4 w-4 text-primary" />
+            ) : (
+              <Lock className="h-4 w-4 text-muted-foreground" />
+            )}
+            <span className="text-sm font-medium">{getTitle()}</span>
           </div>
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
             <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Lock className="h-8 w-8 text-primary" />
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
+                isFirstUserSetup ? 'bg-primary/20' : 'bg-primary/10'
+              }`}>
+                {isFirstUserSetup ? (
+                  <Shield className="h-8 w-8 text-primary" />
+                ) : (
+                  <Lock className="h-8 w-8 text-primary" />
+                )}
               </div>
-              <h1 className="text-xl font-semibold">
-                {isLogin ? 'Welcome Back' : 'Create Account'}
-              </h1>
-              <p className="text-sm text-muted-foreground mt-1">
-                {isLogin ? 'Sign in to access admin panel' : 'Sign up for admin access'}
-              </p>
+              <h1 className="text-xl font-semibold">{getHeading()}</h1>
+              <p className="text-sm text-muted-foreground mt-1">{getSubheading()}</p>
+              {isFirstUserSetup && (
+                <p className="text-xs text-primary mt-2 font-medium">
+                  This account will automatically become an admin
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -204,21 +270,30 @@ const Auth = () => {
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Please wait...' : isLogin ? 'Sign In' : 'Sign Up'}
+              {isLoading 
+                ? 'Please wait...' 
+                : isFirstUserSetup 
+                  ? 'Create Admin Account' 
+                  : isLogin 
+                    ? 'Sign In' 
+                    : 'Sign Up'
+              }
             </Button>
 
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsLogin(!isLogin);
-                  setErrors({});
-                }}
-                className="text-sm text-muted-foreground hover:text-foreground"
-              >
-                {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
-              </button>
-            </div>
+            {!isFirstUserSetup && (
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsLogin(!isLogin);
+                    setErrors({});
+                  }}
+                  className="text-sm text-muted-foreground hover:text-foreground"
+                >
+                  {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
+                </button>
+              </div>
+            )}
 
             <div className="pt-4 border-t border-border">
               <Button
