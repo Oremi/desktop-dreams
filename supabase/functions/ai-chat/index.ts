@@ -10,6 +10,12 @@ const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT = 15;
 const RATE_WINDOW = 60 * 60 * 1000; // 1 hour
 
+// Maximum allowed size for portfolioContext (10KB)
+const MAX_CONTEXT_SIZE = 10 * 1024;
+
+// Allowed keys in portfolioContext to prevent injection of arbitrary data
+const ALLOWED_CONTEXT_KEYS = ['user', 'social', 'skills', 'experience', 'projects'];
+
 function checkRateLimit(ip: string): { allowed: boolean; remaining: number; resetIn: number } {
   const now = Date.now();
   const record = rateLimitMap.get(ip);
@@ -25,6 +31,79 @@ function checkRateLimit(ip: string): { allowed: boolean; remaining: number; rese
   
   record.count++;
   return { allowed: true, remaining: RATE_LIMIT - record.count, resetIn: record.resetTime - now };
+}
+
+// Sanitize string values to prevent prompt injection
+function sanitizeString(str: string, maxLength: number = 500): string {
+  if (typeof str !== 'string') return '';
+  // Remove control characters and limit length
+  return str.replace(/[\x00-\x1F\x7F]/g, '').substring(0, maxLength);
+}
+
+// Validate and sanitize portfolioContext
+function validatePortfolioContext(context: unknown): Record<string, unknown> | null {
+  if (!context || typeof context !== 'object') {
+    return null;
+  }
+
+  const contextStr = JSON.stringify(context);
+  if (contextStr.length > MAX_CONTEXT_SIZE) {
+    console.warn('Portfolio context exceeds maximum size, truncating');
+    return null;
+  }
+
+  const sanitized: Record<string, unknown> = {};
+  const rawContext = context as Record<string, unknown>;
+
+  for (const key of ALLOWED_CONTEXT_KEYS) {
+    if (key in rawContext) {
+      const value = rawContext[key];
+      
+      if (key === 'user' && typeof value === 'object' && value !== null) {
+        const userObj = value as Record<string, unknown>;
+        sanitized[key] = {
+          name: sanitizeString(String(userObj.name || ''), 100),
+          title: sanitizeString(String(userObj.title || ''), 200),
+          bio: sanitizeString(String(userObj.bio || ''), 1000),
+        };
+      } else if (key === 'social' && typeof value === 'object' && value !== null) {
+        const socialObj = value as Record<string, string>;
+        sanitized[key] = Object.fromEntries(
+          Object.entries(socialObj)
+            .slice(0, 10)
+            .map(([k, v]) => [sanitizeString(k, 50), sanitizeString(String(v), 200)])
+        );
+      } else if (key === 'skills' && typeof value === 'object' && value !== null) {
+        const skillsObj = value as Record<string, string[]>;
+        sanitized[key] = Object.fromEntries(
+          Object.entries(skillsObj)
+            .slice(0, 10)
+            .map(([k, v]) => [
+              sanitizeString(k, 50),
+              Array.isArray(v) ? v.slice(0, 20).map(s => sanitizeString(String(s), 50)) : []
+            ])
+        );
+      } else if ((key === 'experience' || key === 'projects') && Array.isArray(value)) {
+        sanitized[key] = value.slice(0, 20).map(item => {
+          if (typeof item === 'object' && item !== null) {
+            const obj = item as Record<string, unknown>;
+            return Object.fromEntries(
+              Object.entries(obj)
+                .slice(0, 15)
+                .map(([k, v]) => [
+                  sanitizeString(k, 50),
+                  typeof v === 'string' ? sanitizeString(v, 500) :
+                  Array.isArray(v) ? v.slice(0, 10).map(s => sanitizeString(String(s), 100)) : v
+                ])
+            );
+          }
+          return null;
+        }).filter(Boolean);
+      }
+    }
+  }
+
+  return sanitized;
 }
 
 serve(async (req) => {
@@ -63,12 +142,26 @@ serve(async (req) => {
 
     const { message, portfolioContext } = await req.json();
     
-    if (!message) {
+    // Validate message
+    if (!message || typeof message !== 'string') {
       return new Response(
-        JSON.stringify({ error: 'Message is required' }),
+        JSON.stringify({ error: 'Message is required and must be a string' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    // Sanitize user message
+    const sanitizedMessage = sanitizeString(message, 2000);
+    if (sanitizedMessage.length === 0) {
+      return new Response(
+        JSON.stringify({ error: 'Message cannot be empty' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate and sanitize portfolio context
+    const validatedContext = validatePortfolioContext(portfolioContext);
+    const userName = (validatedContext?.user as { name?: string } | undefined)?.name || 'this developer';
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
@@ -79,8 +172,8 @@ serve(async (req) => {
       );
     }
 
-    // Build system prompt with portfolio context
-    const systemPrompt = `You are an AI assistant for ${portfolioContext?.user?.name || 'this developer'}'s portfolio website. 
+    // Build system prompt with validated portfolio context
+    const systemPrompt = `You are an AI assistant for ${userName}'s portfolio website.
 You ONLY answer questions about the portfolio owner's information, skills, projects, and experience.
 You should be helpful, friendly, and professional.
 
@@ -91,7 +184,7 @@ IMPORTANT RULES:
 - Use the provided portfolio data to answer accurately
 
 PORTFOLIO DATA:
-${JSON.stringify(portfolioContext, null, 2)}
+${JSON.stringify(validatedContext, null, 2)}
 
 If you don't have specific information, say so honestly. Always be helpful in directing visitors to relevant sections of the portfolio.`;
 
