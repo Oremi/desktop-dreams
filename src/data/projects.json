@@ -19,7 +19,7 @@
       "year": 2025,
       "tech": ["React", "TypeScript", "Tailwind CSS", "Framer Motion", "Supabase"],
       "framerLink": "https://elovesend.lovable.app",
-      "githubLink": "https://github.com/oremi/e-love",
+      "githubLink": "",
       "icon": "💖",
       "category": "personal",
       "featured": true
@@ -28,7 +28,7 @@
       "id": 3,
       "name": "Solar Estimator Pro",
       "description": "A localized solar design and estimation platform built for the Nigerian energy market. Helps homeowners and installers accurately size solar systems, estimate costs in Naira, and make informed decisions using AI-assisted recommendations.",
-      "year": 2025,
+      "year": 2026,
       "tech": ["React", "TypeScript", "Tailwind CSS", "Supabase", "AI"],
       "framerLink": "https://solarsave.lovable.app",
       "githubLink": "",
