@@ -10,10 +10,7 @@ interface StoredFile {
   name: string;
   id: string;
   created_at: string;
-  metadata: {
-    size: number;
-    mimetype: string;
-  };
+  metadata: Record<string, any> | null;
 }
 
 const Admin = () => {
