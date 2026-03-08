@@ -29,17 +29,16 @@ const Auth = () => {
   useEffect(() => {
     const checkFirstUserSetup = async () => {
       try {
-        // Check if any user roles exist (if not, this is first-time setup)
-        const { count, error } = await supabase
-          .from('user_roles')
-          .select('*', { count: 'exact', head: true });
+        // Check if any admin exists using a SECURITY DEFINER RPC
+        const { data, error } = await supabase.rpc('has_any_admin');
         
         if (error) {
           console.error('Error checking setup status:', error);
           setIsFirstUserSetup(false);
         } else {
-          setIsFirstUserSetup(count === 0);
-          if (count === 0) {
+          const hasAdmin = data === true;
+          setIsFirstUserSetup(!hasAdmin);
+          if (!hasAdmin) {
             setIsLogin(false); // Force signup mode for first user
           }
         }
