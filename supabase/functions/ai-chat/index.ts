@@ -200,7 +200,7 @@ ${JSON.stringify(validatedContext, null, 2)}
 
 If you don't have specific information, say so honestly. Always be helpful in directing visitors to relevant sections of the portfolio.`;
 
-    console.log('Sending request to Lovable AI with message:', message.substring(0, 100));
+    console.log('Sending request to Lovable AI with message length:', sanitizedMessage.length);
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -212,7 +212,7 @@ If you don't have specific information, say so honestly. Always be helpful in di
         model: 'google/gemini-3-flash-preview',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: message }
+          { role: 'user', content: sanitizedMessage }
         ],
         stream: true,
         max_tokens: 500
