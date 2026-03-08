@@ -76,6 +76,15 @@ serve(async (req) => {
       );
     }
 
+    // Restrict to portfolio owner's username to prevent open proxy abuse
+    const allowedUsername = Deno.env.get('ALLOWED_GITHUB_USERNAME');
+    if (allowedUsername && username.toLowerCase() !== allowedUsername.toLowerCase()) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized username' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const headers = {
       'Authorization': `Bearer ${githubToken}`,
       'Accept': 'application/vnd.github.v3+json',
