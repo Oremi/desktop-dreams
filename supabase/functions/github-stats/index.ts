@@ -90,7 +90,14 @@ serve(async (req) => {
 
     // Restrict to portfolio owner's username to prevent open proxy abuse
     const allowedUsername = Deno.env.get('ALLOWED_GITHUB_USERNAME');
-    if (allowedUsername && username.toLowerCase() !== allowedUsername.toLowerCase()) {
+    if (!allowedUsername) {
+      console.error('ALLOWED_GITHUB_USERNAME not configured');
+      return new Response(
+        JSON.stringify({ error: 'GitHub integration not fully configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    if (username.toLowerCase() !== allowedUsername.toLowerCase()) {
       return new Response(
         JSON.stringify({ error: 'Unauthorized username' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
