@@ -6,6 +6,28 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Simple in-memory rate limiting (per IP, 10 requests/hour)
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT = 10;
+const RATE_WINDOW = 60 * 60 * 1000; // 1 hour
+
+function checkRateLimit(ip: string): { allowed: boolean; remaining: number; resetIn: number } {
+  const now = Date.now();
+  const record = rateLimitMap.get(ip);
+  
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_WINDOW });
+    return { allowed: true, remaining: RATE_LIMIT - 1, resetIn: RATE_WINDOW };
+  }
+  
+  if (record.count >= RATE_LIMIT) {
+    return { allowed: false, remaining: 0, resetIn: record.resetTime - now };
+  }
+  
+  record.count++;
+  return { allowed: true, remaining: RATE_LIMIT - record.count, resetIn: record.resetTime - now };
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -13,20 +35,43 @@ serve(async (req) => {
   }
 
   try {
+    // Rate limiting
+    const clientIP = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
+                     req.headers.get('cf-connecting-ip') || 
+                     'unknown';
+    
+    const rateLimit = checkRateLimit(clientIP);
+    if (!rateLimit.allowed) {
+      const resetMinutes = Math.ceil(rateLimit.resetIn / 60000);
+      return new Response(
+        JSON.stringify({ error: `Too many requests. Please try again in ${resetMinutes} minutes.` }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { username } = await req.json();
     const githubToken = Deno.env.get('GITHUB_TOKEN');
 
     if (!githubToken) {
       console.error('GITHUB_TOKEN not configured');
       return new Response(
-        JSON.stringify({ error: 'GitHub token not configured' }),
+        JSON.stringify({ error: 'GitHub integration not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    if (!username) {
+    if (!username || typeof username !== 'string') {
       return new Response(
-        JSON.stringify({ error: 'Username is required' }),
+        JSON.stringify({ error: 'A valid username is required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate username format (GitHub usernames: alphanumeric + hyphens, max 39 chars)
+    const usernameRegex = /^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?$/;
+    if (!usernameRegex.test(username)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid GitHub username format' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -41,17 +86,17 @@ serve(async (req) => {
 
     // Fetch user profile, repos, and events in parallel
     const [userResponse, reposResponse, eventsResponse] = await Promise.all([
-      fetch(`https://api.github.com/users/${username}`, { headers }),
-      fetch(`https://api.github.com/users/${username}/repos?per_page=100&sort=updated`, { headers }),
-      fetch(`https://api.github.com/users/${username}/events/public?per_page=10`, { headers })
+      fetch(`https://api.github.com/users/${encodeURIComponent(username)}`, { headers }),
+      fetch(`https://api.github.com/users/${encodeURIComponent(username)}/repos?per_page=100&sort=updated`, { headers }),
+      fetch(`https://api.github.com/users/${encodeURIComponent(username)}/events/public?per_page=10`, { headers })
     ]);
 
     if (!userResponse.ok) {
       const errorText = await userResponse.text();
-      console.error('GitHub API user error:', errorText);
+      console.error('GitHub API user error:', userResponse.status, errorText);
       return new Response(
-        JSON.stringify({ error: 'Failed to fetch user data', details: errorText }),
-        { status: userResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Failed to fetch GitHub data. Please try again later.' }),
+        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -109,9 +154,8 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error('Error in github-stats function:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: 'An unexpected error occurred. Please try again later.' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
